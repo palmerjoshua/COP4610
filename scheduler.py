@@ -1,13 +1,14 @@
-from process import Process
-from rawdata import RawData
+from queue import Queue
 
 class Scheduler:
     def __init__(self, processes=None):
         self.processes = processes or []
-        pass
+        self.q1 = self.q2 = self.q3 = Queue()
 
 
 def main():
+    from process import Process
+    from rawdata import RawData
     data = RawData()
     processes = data.processes()
     for i, p in enumerate(processes):
