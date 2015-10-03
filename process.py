@@ -6,6 +6,7 @@ Unit 6 CPU Scheduler Assignment
 
 github.com/palmerjoshua/COP4610
 """
+
 class Process:
     def __init__(self, number, arrival_time=0, burst_time=0, raw_list=None):
         """Represents a Process that will run on the CPU.
@@ -14,8 +15,8 @@ class Process:
         """
         self.number = number
         self.schedule = {'cpu': [], 'io': []}
-        self.current_burst_time = burst_time
-        self.current_arrival_time = arrival_time
+        self.burst_time = self.current_burst_time = burst_time
+        self.arrival_time = self.current_arrival_time = arrival_time
         if raw_list:
             self.import_raw(raw_list)
 
