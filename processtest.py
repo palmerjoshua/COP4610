@@ -4,12 +4,14 @@ import unittest
 
 class ProcessTest(unittest.TestCase):
     def setUp(self):
-        self.process = Process(0)
-        self.raw_data = RawData()
+        self.raw_data = RawData().p1
+        self.process = Process(0, self.raw_data)
 
 
-    def test_import_raw(self):
-        self.process.import_raw(self.raw_data.p1)
-        cpu, io = self.raw_data.p1[::2], self.raw_data.p1[1::2]
-        pcpu, pio = self.process.schedule['cpu'], self.process.schedule['io']
-        self.assertTrue(cpu==pcpu and io==pio, "should be equal")
+
+    def test_is_done(self):
+        while not self.process.is_done():
+            self.process.schedule['cpu'].pop()
+            self.process.schedule['io'].pop()
+        valid = not self.process.schedule['cpu'] and not self.process.schedule['io']
+        self.assertTrue(valid and self.process.is_done())

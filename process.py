@@ -14,24 +14,16 @@ class Process:
         :type number int
         """
         self.number = number
-        self.schedule = {'cpu': [], 'io': []}
+        self.schedule = {
+            'cpu': raw_list[0::2] if raw_list else [],
+            'io': raw_list[1::2] if raw_list else []}
         self.burst_time = self.current_burst_time = burst_time
         self.arrival_time = self.current_arrival_time = arrival_time
-        if raw_list:
-            self.import_raw(raw_list)
+
 
     def is_done(self):
         return (not self.schedule['cpu'] and not self.schedule['io']) or \
-               (all(i==0 for i in self.schedule['cpu']) and all(i==0 for i in self.schedule['io']))
-
-    def import_raw(self, raw_list):
-        """Turns a list of raw data into a schedule dictionary.
-        :param raw_list list of raw data
-        :type raw_list list of int
-        """
-        for i, item in enumerate(raw_list):
-            target = 'io' if i % 2 else 'cpu'
-            self.schedule[target].append(item)
+               (all(i == 0 for i in self.schedule['cpu']) and all(i == 0 for i in self.schedule['io']))
 
     def burst(self, amount=None):
         """Changes the attributes of the Process based
