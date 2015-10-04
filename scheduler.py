@@ -7,13 +7,21 @@ Unit 6 CPU Scheduler Assignment
 github.com/palmerjoshua/COP4610
 """
 from mlfq import MLFQ
-
+from queue import Queue
 class Scheduler:
     def __init__(self, processes=None):
         """Scheduler parent class
         :param processes list of Process objects
         """
         self.processes = processes or []
+        self.ready_q = []
+        self.current_time = 0
+
+    def all_done(self):
+        return self.ready_q and not self.processes
+
+    def run(self):
+        pass
 
 
 class FCFSScheduler(Scheduler):
@@ -23,6 +31,17 @@ class FCFSScheduler(Scheduler):
         :type processes list of Process
         """
         Scheduler.__init__(self, processes)
+
+    def run(self):
+        while not self.all_done():
+            current_process = self.processes[0]
+           # self.current_time += sum(i for i in current_process.schedule['cpu'])
+            self.current_time += sum(i for i in current_process.schedule['io'])
+            self.ready_q.append(current_process)
+            self.processes.remove(current_process)
+            
+
+
 
 
 class MLFQScheduler(Scheduler):
@@ -47,3 +66,9 @@ class MLFQScheduler(Scheduler):
                 self.queues[key] = MLFQ(priority, time_quantum)
         else:
             raise ValueError("queue_data must be tuples")
+
+def main():
+    pass
+
+if __name__ == '__main':
+    main()

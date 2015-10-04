@@ -10,6 +10,7 @@ class MLFQTest(unittest.TestCase):
         for d, process in zip(data, processes):
             process.import_raw(d)
         self.sched = scheduler.MLFQScheduler(processes)
+        self.fcfs = scheduler.FCFSScheduler(processes)
 
     def test_init_queues(self):
         self.sched.init_queues((1, 3), (2, 4))
@@ -24,3 +25,9 @@ class MLFQTest(unittest.TestCase):
     def test_init_queues_fail(self):
         self.assertRaises(ValueError, self.sched.init_queues, 1,2,3)
         pass
+
+    def test_run(self): # todo should eventually work
+        expected_end_time = 1114
+        self.fcfs.run()
+        self.assertEqual(self.fcfs.current_time, expected_end_time)
+

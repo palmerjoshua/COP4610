@@ -20,6 +20,10 @@ class Process:
         if raw_list:
             self.import_raw(raw_list)
 
+    def is_done(self):
+        return (not self.schedule['cpu'] and not self.schedule['io']) or \
+               (all(i==0 for i in self.schedule['cpu']) and all(i==0 for i in self.schedule['io']))
+
     def import_raw(self, raw_list):
         """Turns a list of raw data into a schedule dictionary.
         :param raw_list list of raw data
@@ -29,7 +33,7 @@ class Process:
             target = 'io' if i % 2 else 'cpu'
             self.schedule[target].append(item)
 
-    def burst(self, amount):
+    def burst(self, amount=None):
         """Changes the attributes of the Process based
         on its CPU burst.
         :param amount the length of the CPU burst.
