@@ -25,13 +25,27 @@ class Process:
         return (not self.schedule['cpu'] and not self.schedule['io']) or \
                (all(i == 0 for i in self.schedule['cpu']) and all(i == 0 for i in self.schedule['io']))
 
+    def work(self, sched='cpu', amount=None):
+        current_burst = self.schedule[sched][0]
+        total_burst = 0
+        amount = amount or current_burst
+        for i in range(amount):
+            total_burst += 1
+            current_burst -= 1
+            if not current_burst:
+                break
+        if current_burst <= 0:
+            self.schedule[sched] = self.schedule[sched][1:]
+        return total_burst
+
+
     def burst(self, amount=None):
         """Changes the attributes of the Process based
         on its CPU burst.
         :param amount the length of the CPU burst.
         :type amount int
         """
-        current = self.current_burst_time - amount
-        self.current_burst_time = current if current >= 0 else 0
-        self.current_arrival_time += amount
-        # todo fully implement burst algorithm
+        self.work(sched='cpu', amount=amount)
+
+    def block(self, amount=None):
+        self.work(sched='io', amount=amount)

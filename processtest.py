@@ -1,6 +1,6 @@
 from process import Process
 from rawdata import RawData
-import unittest
+import unittest, random
 
 class ProcessTest(unittest.TestCase):
     def setUp(self):
@@ -15,3 +15,22 @@ class ProcessTest(unittest.TestCase):
             self.process.schedule['io'].pop()
         valid = not self.process.schedule['cpu'] and not self.process.schedule['io']
         self.assertTrue(valid and self.process.is_done())
+
+
+    def test_burst(self):
+        expected_burst = sum(i for i in self.process.schedule['cpu'])
+        actual_burst = 0
+        while not self.process.is_done():
+            current_burst = random.randrange(1, self.process.schedule['cpu'][0]+1)
+            actual_burst += self.process.burst(amount=current_burst)
+        self.assertEqual(expected_burst, actual_burst)
+
+
+    def test_block(self):
+        expected_burst = sum(i for i in self.process.schedule['io'])
+        actual_burst = 0
+        while not self.process.is_done():
+            current_burst = random.randrange(1, self.process.schedule['io'][0]+1)
+            actual_burst += self.process.block(amount=current_burst)
+        self.assertEqual(expected_burst, actual_burst)
+
