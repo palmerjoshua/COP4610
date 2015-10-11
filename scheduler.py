@@ -35,6 +35,9 @@ class FCFSScheduler(Scheduler):
     def run(self):
         while not self.all_done():
             current_process = self.processes[0]
+            current_burst = current_process.schedule['cpu'][0]
+            current_io = current_process.schedule['io'][0]
+
            # self.current_time += sum(i for i in current_process.schedule['cpu'])
             self.current_time += sum(i for i in current_process.schedule['io'])
             self.ready_q.append(current_process)

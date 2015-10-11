@@ -16,16 +16,24 @@ class Process:
         self.number = number
         self.schedule = {
             'cpu': raw_list[0::2] if raw_list else [],
-            'io': raw_list[1::2] if raw_list else []}
-        self.burst_time = self.current_burst_time = burst_time
-        self.arrival_time = self.current_arrival_time = arrival_time
+            'io': raw_list[1::2] if raw_list else []
+        }
+        self.burst_time = burst_time
+        self.arrival_time = arrival_time
+        self.wait_time = 0
 
 
     def is_done(self):
         return (not self.schedule['cpu'] and not self.schedule['io']) or \
                (all(i == 0 for i in self.schedule['cpu']) and all(i == 0 for i in self.schedule['io']))
 
-    def work(self, sched='cpu', amount=None):
+    def burst(self, amount=None):
+        """Changes the attributes of the Process based
+        on its CPU burst.
+        :param amount the length of the CPU burst.
+        :type amount int
+        """
+        sched = 'cpu'
         current_burst = self.schedule[sched][0]
         total_burst = 0
         amount = amount or current_burst
@@ -39,13 +47,7 @@ class Process:
         return total_burst
 
 
-    def burst(self, amount=None):
-        """Changes the attributes of the Process based
-        on its CPU burst.
-        :param amount the length of the CPU burst.
-        :type amount int
-        """
-        self.work(sched='cpu', amount=amount)
-
     def block(self, amount=None):
-        self.work(sched='io', amount=amount)
+       self.wait_time += amount or self.schedule['io'][0]
+       if self.schedule['io'][0] <= 0:
+           self.schedule['io'] = self.schedule['io'][1:]
