@@ -17,11 +17,6 @@ class GanttChart:
     def get_chart(self):
         chart = ""
         for i, block in enumerate(self.blocks):
-            chart += "{:<4} P{} ".format(block['start_time'], block['process_number'])
-
-            if i == len(self.blocks)-1:
-                chart += " {:>4}".format(block['end_time'])
-            elif i > 0 and i % 8 == 0:
-                chart += "\n"
+            print("{:>4} P{} {:<4}".format(block['start_time'], block['process_number'], block['end_time']))
         return chart.rstrip(' ')
 

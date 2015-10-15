@@ -38,13 +38,12 @@ class FCFSScheduler(Scheduler):
     def run(self):
         while not self.done():
 
-            start = self.current_time
 
             current_process = min(self.processes, key=lambda p: p.arrival_time)
-            #print("Current Process: P{}".format(current_process.number))
+            self.current_time = start = self.current_time if self.current_time >= current_process.arrival_time else current_process.arrival_time
             burst_amount = current_process.burst(start_time=self.current_time)
             self.current_time += burst_amount
-            self.chart.add_block(current_process.number, start, self.current_time)
+            self.chart.add_block(current_process.number, start, burst_amount)
             #print("Current Time: {}".format(self.current_time))
             if current_process.is_done():
                 self.finished.append(current_process)
