@@ -24,13 +24,3 @@ class ProcessTest(unittest.TestCase):
             current_burst = random.randrange(1, self.process.schedule['cpu'][0]+1)
             actual_burst += self.process.burst(amount=current_burst)
         self.assertEqual(expected_burst, actual_burst)
-
-
-    def test_block(self):
-        expected_burst = sum(i for i in self.process.schedule['io'])
-        actual_burst = 0
-        while not self.process.is_done():
-            current_burst = random.randrange(1, self.process.schedule['io'][0]+1)
-            actual_burst += self.process.block(amount=current_burst)
-        self.assertEqual(expected_burst, actual_burst)
-
