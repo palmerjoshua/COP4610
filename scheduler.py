@@ -7,18 +7,21 @@ Unit 6 CPU Scheduler Assignment
 github.com/palmerjoshua/COP4610
 """
 from mlfq import MLFQ
+from gantt import GanttChart
+
 from queue import Queue
 class Scheduler:
-    def __init__(self, processes=None):
+    def __init__(self, algorithm_name, processes=None):
         """Scheduler parent class
         :param processes list of Process objects
         """
         self.processes = processes or []
-        self.ready_q = []
+        self.finished = []
         self.current_time = 0
+        self.chart = GanttChart(algorithm_name)
 
-    def all_done(self):
-        return self.ready_q and not self.processes
+    def done(self):
+        return self.finished and not self.processes
 
     def run(self):
         pass
@@ -30,21 +33,24 @@ class FCFSScheduler(Scheduler):
         :param processes List of processes that will be scheduled.
         :type processes list of Process
         """
-        Scheduler.__init__(self, processes)
+        Scheduler.__init__(self, 'FCFS', processes)
 
     def run(self):
-        while not self.all_done():
-            current_process = self.processes[0]
-            current_burst = current_process.schedule['cpu'][0]
-            current_io = current_process.schedule['io'][0]
+        while not self.done():
 
-           # self.current_time += sum(i for i in current_process.schedule['cpu'])
-            self.current_time += sum(i for i in current_process.schedule['io'])
-            self.ready_q.append(current_process)
-            self.processes.remove(current_process)
-            
+            start = self.current_time
 
-
+            current_process = min(self.processes, key=lambda p: p.arrival_time)
+            #print("Current Process: P{}".format(current_process.number))
+            burst_amount = current_process.burst(start_time=self.current_time)
+            self.current_time += burst_amount
+            self.chart.add_block(current_process.number, start, self.current_time)
+            #print("Current Time: {}".format(self.current_time))
+            if current_process.is_done():
+                self.finished.append(current_process)
+                self.processes.remove(current_process)
+        print(self.chart.get_chart())
+        pass
 
 
 class MLFQScheduler(Scheduler):
@@ -71,7 +77,12 @@ class MLFQScheduler(Scheduler):
             raise ValueError("queue_data must be tuples")
 
 def main():
-    pass
+    from rawdata import RawData
+    from process import Process
+    processes = [Process(i+1, raw_list=plist) for i, plist in enumerate(RawData().process_list())]
+    scheduler = FCFSScheduler(processes)
+    scheduler.run()
+    print("Ending time: {}".format(scheduler.current_time))
 
-if __name__ == '__main':
+if __name__ == '__main__':
     main()
