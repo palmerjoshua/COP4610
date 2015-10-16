@@ -8,12 +8,13 @@ github.com/palmerjoshua/COP4610
 """
 
 class Process:
-    def __init__(self, process_number, arrival_time=0, raw_list=None):
+    def __init__(self, process_number, arrival_time=0, priority=1, raw_list=None):
         """Represents a Process that will run on the CPU.
         :param process_number unique identifier
         :type process_number int
         """
         self.number = process_number
+        self.priority = priority
         self.schedule = {
             'cpu': raw_list[0::2] if raw_list else [],
             'io': raw_list[1::2] if raw_list else []

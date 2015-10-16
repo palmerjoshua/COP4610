@@ -10,6 +10,7 @@ from mlfq import MLFQ
 from gantt import GanttChart
 
 from queue import Queue
+
 class Scheduler:
     def __init__(self, algorithm_name, processes=None):
         """Scheduler parent class
@@ -52,7 +53,6 @@ class FCFSScheduler(Scheduler):
                 self.processes.remove(current_process)
         print(self.chart.get_chart())
         pass
-
 
 class MLFQScheduler(Scheduler):
     def __init__(self, processes, *priority_timeq):
