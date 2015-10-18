@@ -20,10 +20,19 @@ class Process:
             'io': raw_list[1::2] if raw_list else []
         }
         self.arrival_time = arrival_time
+        self.in_io = False
         self.wait_time = 0
         self.work_time = 0
         self.turnaround_time = 0
         self.response_time = 0
+
+    def _do_io(self, amount=None):
+        if self.in_io:
+            amount = amount or self.get_next_io()
+            self.schedule['io'] -= amount
+            if self.schedule['io'] <= 0:
+                self.schedule['io'].pop(0)
+                self.in_io = False
 
     def is_done(self):
         return len(self.schedule['cpu']) == 0
@@ -61,6 +70,8 @@ class Process:
                     break
             if current_burst <= 0:
                 self.schedule['cpu'] = self.schedule['cpu'][1:]
+            else:
+                self.schedule['cpu'][0] = current_burst
         return total_burst
 
     def equals(self, other):

@@ -21,6 +21,7 @@ class Scheduler:
         self.current_time = 0
         self.chart = GanttChart(algorithm_name)
 
+
     def done(self):
         return self.finished and not self.processes
 
@@ -36,10 +37,30 @@ class FCFSScheduler(Scheduler):
         """
         Scheduler.__init__(self, 'FCFS', processes)
 
+
+    def display(self, current_process):
+        print("*" * 42)
+        print("Current time:", self.current_time)
+        print("Running: P{num}".format(num=current_process.number))
+        #print("*" * 30)
+        ready_q = [p for p in self.processes if p.number != current_process.number and p.arrival_time <= self.current_time]
+        ready_q.sort(key=lambda p: p.arrival_time)
+        if ready_q:
+            print("Ready Queue:    Process              Burst")
+        for p in ready_q:
+            print("                     P{}                 {:>2}".format(p.number, p.get_next_burst()))
+        in_io = [p for p in self.processes if p.number != current_process.number and p not in ready_q]
+        in_io.sort(key=lambda p: p.arrival_time-self.current_time)
+        if in_io:
+            print("In I/O:         Process     Remaining Time")
+        for p in in_io:
+            print("                     P{}                 {:>2}".format(p.number, p.arrival_time - self.current_time))
+
+
     def run(self):
         while not self.done():
             current_process = min(self.processes, key=lambda p: p.arrival_time)
-
+            self.display(current_process)
             if self.current_time < current_process.arrival_time:
                 self.current_time = current_process.arrival_time
 
@@ -55,7 +76,7 @@ class FCFSScheduler(Scheduler):
             if current_process.is_done():
                 self.finished.append(current_process)
                 self.processes.remove(current_process)
-        print(self.chart.get_chart())
+        #print(self.chart.get_chart())
         pass
 
 
@@ -67,7 +88,7 @@ class MLFQScheduler(Scheduler):
         Scheduler.__init__(self, processes)
         self.processes = processes
         self.queues = self._init_queues()
-        self.ready_queue = deque()
+
 
     def _init_queues(self):
         queues = OrderedDict()
@@ -80,22 +101,22 @@ class MLFQScheduler(Scheduler):
         return self.finished and all(q.empty() for q in self.queues.values())
 
     def _get_arrived(self, load_first=True):
-        if len(self.ready_queue) > 0 and load_first:
-            self._load_ready_procs()
         for q in self.queues.values():
             if q and self.current_time >= q[0].arrival_time:
                 return q[0]
+        pass
         raise NoArrivalException('No queue has an arrived process')
 
     def _add_to_queue(self, *procs):
         for p in procs:
             self.queues[p.priority].append(p)
 
-    def _load_ready_procs(self):
-        to_deploy = [p for p in self.ready_queue if self.current_time >= p.arrival_time]
-        for p in to_deploy:
-            self.ready_queue.remove(p)
-        self._add_to_queue(*to_deploy)
+    def do_io(self, current_number):
+        procs = []
+        for q in self.queues.values():
+            for p in q:
+                if p.number != current_number and p.in_io:
+                    p.do_io(1)
 
 
     def run(self):
@@ -106,6 +127,8 @@ class MLFQScheduler(Scheduler):
                 self.current_time += 1
                 continue
             else:
+                if self.current_time == 976:
+                    pass
                 current_q = self.queues[current_proc.priority]
                 burst_limit = current_q.time_quantum or current_proc.get_next_burst()
                 potential_burst = current_proc.get_next_burst()
@@ -116,16 +139,23 @@ class MLFQScheduler(Scheduler):
                     current_burst = current_proc.burst(amount=1, start_time=self.current_time)
                     total_burst += current_burst
                     self.current_time += current_burst
+                    current_proc.arrival_time = self.current_time
                     i += 1
-                io_time = current_proc.get_next_io(True) if i == burst_limit else 0
-                current_proc.arrival_time = self.current_time + io_time
+
                 current_q.remove(current_proc)
                 if current_proc.is_done():
                     self.finished.append(current_proc)
-                elif i == burst_limit and potential_burst - total_burst <= 0:
+                elif potential_burst - total_burst <= 0:
+                    io_time = current_proc.get_next_io(True) if (i==burst_limit and total_burst==potential_burst) else 0
+                    current_proc.arrival_time = self.current_time + io_time
                     current_q.append(current_proc)
                 else:
+
+                    current_proc.priority += 1 if current_proc.priority < 3 else 0
+                    #self.queues[current_proc.priority].append(current_proc)
                     self.ready_queue.append(current_proc)
+                self.chart.add_block(current_proc.number, start, total_burst)
+        print(self.chart.get_chart())
 
 
 def display_fcfs_gantt_chart():
@@ -142,5 +172,5 @@ def main():
     sched.run()
     print("Ending time: {}".format(sched.current_time))
 if __name__ == '__main__':
-    # display_fcfs_gantt_chart()
-    main()
+    display_fcfs_gantt_chart()
+    #main()

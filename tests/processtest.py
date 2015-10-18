@@ -2,6 +2,7 @@ from process import Process
 from rawdata import RawData
 import unittest, random
 
+
 class ProcessTest(unittest.TestCase):
     def setUp(self):
         self.raw_data = RawData().p1
