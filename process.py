@@ -34,8 +34,18 @@ class Process:
         self.work_time += burst_amount
         self.wait_time += (start_time - self.arrival_time)
         self.turnaround_time = self.wait_time + self.work_time
-        io_time = self.schedule['io'].pop(0) if self.schedule['io'] else 0
-        self.arrival_time = start_time + burst_amount + io_time
+
+    def get_next_burst(self, pop=False):
+        try:
+            return self.schedule['cpu'].pop(0) if pop else self.schedule['cpu'][0]
+        except IndexError:
+            return 0
+
+    def get_next_io(self, pop=False):
+        try:
+            return self.schedule['io'].pop(0) if pop else self.schedule['cpu'][0]
+        except IndexError:
+            return 0
 
     def _get_burst(self, amount):
         if not amount:
@@ -53,12 +63,13 @@ class Process:
                 self.schedule['cpu'] = self.schedule['cpu'][1:]
         return total_burst
 
+    def equals(self, other):
+        try:
+            return self.number == other.number
+        except AttributeError:
+            return False
+
     def burst(self, amount=0, start_time=0):
-        """Changes the attributes of the Process based
-        on its CPU burst.
-        :param amount the length of the CPU burst.
-        :type amount int
-        """
         if not self.schedule['cpu']:
             return 0
         total_burst = self._get_burst(amount)

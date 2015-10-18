@@ -6,15 +6,13 @@ Unit 6 CPU Scheduler Assignment
 
 github.com/palmerjoshua/COP4610
 """
-from queue import Queue
+from collections import deque
 
-class MLFQ(Queue):
-    def __init__(self, priority, time_quantum, max_size=0):
-        """Same as a Queue, but also has a priority and a time quantum.
-        :param priority The scheduling priority of the items in the queue
-        :type priority int
-        :param time_quantum The time quantum used for the RR algorithm
-        :type time_quantum int"""
-        Queue.__init__(self, maxsize=max_size)
+class MLFQ(deque):
+    def __init__(self, priority, time_quantum=None, iterable=()):
+        deque.__init__(self, iterable=iterable)
         self.priority = priority
         self.time_quantum = time_quantum
+
+    def empty(self):
+        return len(self) == 0
